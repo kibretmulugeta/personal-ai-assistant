@@ -52,3 +52,7 @@ target-version = ['py313']
 [tool.isort]
 profile = "black"
 line_length = 88
+
+[tool.vercel]
+entrypoint = "apps.backend.app.main:app"
+
