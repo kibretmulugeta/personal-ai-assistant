@@ -32,7 +32,7 @@ class Settings(BaseSettings):
 
     # CORS Configuration
     CORS_ORIGINS: List[str] = Field(
-        default=["http://localhost:3000", "http://localhost:8000"]
+        default=["*"]
     )
     ALLOWED_HOSTS: List[str] = Field(default=["*"])
 
