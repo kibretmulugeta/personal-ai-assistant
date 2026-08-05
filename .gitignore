@@ -1,0 +1,39 @@
+# Environment variables & secrets
+.env
+*.env
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+pip-log.txt
+pip-delete-this-directory/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Databases & local sqlite
+*.sqlite
+*.db
+knowledge_base.sqlite
+
+# Node / JS
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDEs & System
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

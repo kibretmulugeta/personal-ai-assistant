@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alemu Kibret Mulugeta - Portfolio Test Bench</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      padding: 40px 20px;
+      text-align: center;
+      background: #1e293b;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    h1 { margin: 0 0 10px 0; color: #6366f1; font-size: 2.5rem; }
+    p { margin: 0; color: #94a3b8; font-size: 1.1rem; }
+    main {
+      flex: 1;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .tag {
+      display: inline-block;
+      background: #4f46e5;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      margin-right: 8px;
+    }
+  </style>
+  <link rel="stylesheet" href="widget.css">
+</head>
+<body>
+
+  <header>
+    <h1>Alemu Kibret Mulugeta</h1>
+    <p>AI Researcher | Machine Learning Engineer | Full-Stack Developer</p>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>About Alemu</h2>
+      <p>M.Sc. in Computer Engineering (Artificial Intelligence and Data Engineering) from Bahir Dar University (2025). B.Sc. in Electrical and Computer Engineering from Debre Berhan University (2021).</p>
+    </div>
+
+    <div class="card">
+      <h2>Research Focus</h2>
+      <div>
+        <span class="tag">Medical Image Segmentation</span>
+        <span class="tag">Stroke Lesion Segmentation</span>
+        <span class="tag">U-Net Architectures</span>
+        <span class="tag">Genetic Algorithms</span>
+      </div>
+    </div>
+  </main>
+
+  <script src="widget.js"></script>
+  <script>
+    WebsiteAssistant.init({
+      apiKey: "demo-api-key-12345",
+      apiEndpoint: "http://localhost:8000/api/v1",
+      theme: "dark",
+      position: "bottom-right",
+      primaryColor: "#6366f1"
+    });
+  </script>
+
+</body>
+</html>
