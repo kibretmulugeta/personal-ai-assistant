@@ -99,8 +99,49 @@ def create_application() -> FastAPI:
             "name": settings.APP_NAME,
             "status": "online",
             "version": "0.1.0",
-            "message": "Personal AI Assistant API is running"
+            "message": "Personal AI Assistant API is running",
+            "demo_url": "/demo"
         }
+
+    from fastapi.responses import HTMLResponse
+
+    @app.get("/demo", response_class=HTMLResponse, tags=["System"])
+    async def demo_ui():
+        """Returns a live HTML page with the chat widget embedded for easy testing."""
+        html_content = """
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Alemu Kibret Mulugeta - AI Assistant Demo</title>
+          <style>
+            body { margin: 0; padding: 0; font-family: -apple-system, sans-serif; background: #0f172a; color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+            h1 { color: #6366f1; margin-bottom: 10px; }
+            p { color: #94a3b8; max-width: 600px; line-height: 1.6; }
+          </style>
+          <!-- Load Widget CSS from GitHub (via jsdelivr) -->
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kibretmulugeta/personal-ai-assistant@main/apps/widget/dist/widget.css">
+        </head>
+        <body>
+          <h1>AI Digital Twin Demo</h1>
+          <p>This is a live test page hosted directly on your Vercel backend.<br>Look at the bottom right corner of the screen and click the Chat button to talk to your AI!</p>
+          
+          <!-- Load Widget JS from GitHub (via jsdelivr) -->
+          <script src="https://cdn.jsdelivr.net/gh/kibretmulugeta/personal-ai-assistant@main/apps/widget/dist/widget.js"></script>
+          <script>
+            WebsiteAssistant.init({
+              apiKey: "demo-api-key-12345",
+              apiEndpoint: "/api/v1", // Points to this exact same Vercel deployment
+              theme: "dark",
+              position: "bottom-right",
+              primaryColor: "#6366f1"
+            });
+          </script>
+        </body>
+        </html>
+        """
+        return HTMLResponse(content=html_content)
 
     return app
 
