@@ -92,6 +92,16 @@ def create_application() -> FastAPI:
     # Include API Routers
     app.include_router(api_router, prefix=settings.API_V1_STR)
 
+    @app.get("/", tags=["System"])
+    async def root():
+        """Root endpoint returning API status."""
+        return {
+            "name": settings.APP_NAME,
+            "status": "online",
+            "version": "0.1.0",
+            "message": "Personal AI Assistant API is running"
+        }
+
     return app
 
 
