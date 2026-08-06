@@ -3,7 +3,7 @@ Google Gemini Adapter implementation using HTTPX AsyncClient.
 """
 
 import json
-from typing import AsyncGenerator, List, Any
+from typing import AsyncGenerator, List, Any, Optional
 import httpx
 
 from packages.llm.base import BaseLLMAdapter, LLMMessage, LLMResponse
@@ -16,43 +16,88 @@ class GeminiAdapter(BaseLLMAdapter):
         super().__init__(model_name=model_name, api_key=api_key)
         self.base_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent"
 
+    def _is_placeholder_key(self) -> bool:
+        return not self.api_key or "your-" in self.api_key or len(self.api_key.strip()) < 10
+
+    def _build_payload(self, messages: List[LLMMessage], temperature: float, max_tokens: int, system_prompt: Optional[str] = None) -> dict:
+        contents = []
+        system_parts = []
+        
+        if system_prompt:
+            system_parts.append(system_prompt)
+
+        for m in messages:
+            if m.role == "system":
+                system_parts.append(m.content)
+            else:
+                role = "user" if m.role == "user" else "model"
+                contents.append({"role": role, "parts": [{"text": m.content}]})
+
+        # Ensure at least one user content item
+        if not contents:
+            contents.append({"role": role if 'role' in locals() else "user", "parts": [{"text": "Hello"}]})
+
+        payload = {
+            "contents": contents,
+            "generationConfig": {
+                "temperature": temperature,
+                "maxOutputTokens": max_tokens,
+            },
+        }
+
+        if system_parts:
+            payload["systemInstruction"] = {
+                "parts": [{"text": "\n\n".join(system_parts)}]
+            }
+
+        return payload
+
     async def generate(
         self,
         messages: List[LLMMessage],
         temperature: float = 0.7,
         max_tokens: int = 1000,
+        system_prompt: Optional[str] = None,
         **kwargs: Any,
     ) -> LLMResponse:
-        if not self.api_key:
+        if self._is_placeholder_key():
             last_msg = messages[-1].content if messages else ""
             return LLMResponse(
-                content=f"[Gemini Offline Mock] Received: {last_msg}",
+                content=f"[Gemini Offline Mock] Response to: {last_msg}",
                 tokens_used=10,
                 model_name=self.model_name,
             )
 
         url = f"{self.base_url}?key={self.api_key}"
-        contents = []
-        for m in messages:
-            role = "user" if m.role in ["user", "system"] else "model"
-            contents.append({"role": role, "parts": [{"text": m.content}]})
+        payload = self._build_payload(messages, temperature, max_tokens, system_prompt)
 
-        payload = {
-            "contents": contents,
-            "generationConfig": {"temperature": temperature, "maxOutputTokens": max_tokens},
-        }
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                resp = await client.post(url, json=payload)
+                resp.raise_for_status()
+                data = resp.json()
+                
+                candidates = data.get("candidates", [])
+                if not candidates:
+                    raise ValueError("No response candidates returned by Gemini API")
 
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.post(url, json=payload)
-            resp.raise_for_status()
-            data = resp.json()
-            content = data["candidates"][0]["content"]["parts"][0]["text"]
+                content = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+                tokens = data.get("usageMetadata", {}).get("totalTokenCount", 0)
 
+                return LLMResponse(
+                    content=content,
+                    tokens_used=tokens,
+                    model_name=self.model_name,
+                    raw_response=data,
+                )
+        except Exception as e:
+            from apps.backend.app.core.logging import get_logger
+            logger = get_logger("llm.gemini")
+            logger.error(f"Gemini LLM generation API error: {e}", exc_info=True)
             return LLMResponse(
-                content=content,
+                content=f"I am unable to generate a response right now due to a Gemini provider connection error ({type(e).__name__}). Please check your GEMINI_API_KEY configuration.",
                 tokens_used=0,
                 model_name=self.model_name,
-                raw_response=data,
             )
 
     async def stream(
@@ -60,9 +105,10 @@ class GeminiAdapter(BaseLLMAdapter):
         messages: List[LLMMessage],
         temperature: float = 0.7,
         max_tokens: int = 1000,
+        system_prompt: Optional[str] = None,
         **kwargs: Any,
     ) -> AsyncGenerator[str, None]:
-        if not self.api_key:
+        if self._is_placeholder_key():
             last_msg = messages[-1].content if messages else ""
             mock_tokens = f"[Gemini Offline Stream] Response to: {last_msg}".split()
             for token in mock_tokens:
@@ -70,27 +116,29 @@ class GeminiAdapter(BaseLLMAdapter):
             return
 
         stream_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model_name}:streamGenerateContent?key={self.api_key}&alt=sse"
-        contents = []
-        for m in messages:
-            role = "user" if m.role in ["user", "system"] else "model"
-            contents.append({"role": role, "parts": [{"text": m.content}]})
+        payload = self._build_payload(messages, temperature, max_tokens, system_prompt)
 
-        payload = {
-            "contents": contents,
-            "generationConfig": {"temperature": temperature, "maxOutputTokens": max_tokens},
-        }
-
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            async with client.stream("POST", stream_url, json=payload) as resp:
-                resp.raise_for_status()
-                async for line in resp.aiter_lines():
-                    if line.startswith("data: "):
-                        data_str = line[6:].strip()
-                        try:
-                            chunk_data = json.loads(data_str)
-                            parts = chunk_data["candidates"][0]["content"]["parts"]
-                            for part in parts:
-                                if "text" in part:
-                                    yield part["text"]
-                        except json.JSONDecodeError:
-                            continue
+        try:
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                async with client.stream("POST", stream_url, json=payload) as resp:
+                    resp.raise_for_status()
+                    async for line in resp.aiter_lines():
+                        if line.startswith("data: "):
+                            data_str = line[6:].strip()
+                            try:
+                                chunk_data = json.loads(data_str)
+                                candidates = chunk_data.get("candidates", [])
+                                if candidates:
+                                    parts = candidates[0].get("content", {}).get("parts", [])
+                                    for part in parts:
+                                        if "text" in part:
+                                            yield part["text"]
+                            except (json.JSONDecodeError, KeyError, IndexError):
+                                continue
+        except Exception as e:
+            from apps.backend.app.core.logging import get_logger
+            logger = get_logger("llm.gemini")
+            logger.error(f"Gemini LLM streaming API error: {e}", exc_info=True)
+            fallback_text = f"I am unable to generate a response right now due to a Gemini provider connection error ({type(e).__name__}). Please check your GEMINI_API_KEY configuration."
+            for token in fallback_text.split():
+                yield token + " "

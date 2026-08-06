@@ -64,10 +64,13 @@ class OpenAIAdapter(BaseLLMAdapter):
                 content = data["choices"][0]["message"]["content"]
                 tokens = data.get("usage", {}).get("total_tokens", 0)
                 return LLMResponse(content=content, tokens_used=tokens, model_name=self.model_name)
-        except Exception:
+        except Exception as e:
+            from apps.backend.app.core.logging import get_logger
+            logger = get_logger("llm.openai")
+            logger.error(f"OpenAI LLM generation API error: {e}", exc_info=True)
             return LLMResponse(
-                content="[OpenAI Offline Mock] As the digital twin of Alemu Kibret Mulugeta, I can answer questions about Alemu's research in stroke lesion segmentation, U-Net architectures, M.Sc. degree from Bahir Dar University, or software engineering background.",
-                tokens_used=25,
+                content=f"I am unable to generate a response right now due to an LLM provider connection error ({type(e).__name__}). Please check the API key configuration.",
+                tokens_used=0,
                 model_name=self.model_name,
             )
 
@@ -118,7 +121,10 @@ class OpenAIAdapter(BaseLLMAdapter):
                                     yield delta
                             except Exception:
                                 pass
-        except Exception:
-            fallback_text = "As Alemu's AI Digital Twin, I can share that Alemu Kibret Mulugeta is an AI Engineer and Medical Imaging Researcher specializing in U-Net brain MRI segmentation and deep learning systems."
+        except Exception as e:
+            from apps.backend.app.core.logging import get_logger
+            logger = get_logger("llm.openai")
+            logger.error(f"OpenAI LLM streaming API error: {e}", exc_info=True)
+            fallback_text = f"I am unable to generate a response right now due to an LLM provider connection error ({type(e).__name__}). Please check the API key configuration."
             for token in fallback_text.split():
                 yield token + " "

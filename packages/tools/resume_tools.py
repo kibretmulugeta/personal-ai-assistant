@@ -7,22 +7,22 @@ from packages.tools.base import BaseTool, ToolResult
 
 
 class DownloadResumeTool(BaseTool):
-    """Tool for requesting Alemu Kibret Mulugeta's professional resume."""
+    """Tool for requesting Kibret Mulugeta Alemu's professional resume."""
 
     def __init__(self) -> None:
         super().__init__(
             name="download_resume",
-            description="Provides download link for Alemu Kibret Mulugeta's professional resume.",
+            description="Provides download link for Kibret Mulugeta Alemu's professional resume.",
         )
 
     async def execute(self, **kwargs: Any) -> ToolResult:
         return ToolResult(
             success=True,
             tool_name=self.name,
-            message="You can download Alemu Kibret Mulugeta's professional resume below.",
+            message="You can download Kibret Mulugeta Alemu's professional resume using the link below.",
             data={
-                "download_url": "/api/v1/assets/Alemu_Kibret_Resume.pdf",
-                "filename": "Alemu_Kibret_Resume.pdf",
+                "download_url": "https://interactive-portfolio-pied-three.vercel.app/api/resume/download",
+                "filename": "Kibret_Mulugeta_Alemu_Resume.pdf",
                 "format": "PDF",
                 "version": "2026-v1",
             },
@@ -30,22 +30,22 @@ class DownloadResumeTool(BaseTool):
 
 
 class DownloadCVTool(BaseTool):
-    """Tool for requesting Alemu Kibret Mulugeta's academic CV."""
+    """Tool for requesting Kibret Mulugeta Alemu's academic CV."""
 
     def __init__(self) -> None:
         super().__init__(
             name="download_cv",
-            description="Provides download link for Alemu Kibret Mulugeta's complete academic CV.",
+            description="Provides download link for Kibret Mulugeta Alemu's complete academic CV.",
         )
 
     async def execute(self, **kwargs: Any) -> ToolResult:
         return ToolResult(
             success=True,
             tool_name=self.name,
-            message="You can download Alemu Kibret Mulugeta's academic Curriculum Vitae below.",
+            message="You can download Kibret Mulugeta Alemu's academic Curriculum Vitae using the link below.",
             data={
-                "download_url": "/api/v1/assets/Alemu_Kibret_Academic_CV.pdf",
-                "filename": "Alemu_Kibret_Academic_CV.pdf",
+                "download_url": "https://interactive-portfolio-pied-three.vercel.app/api/resume/download",
+                "filename": "Kibret_Mulugeta_Alemu_Academic_CV.pdf",
                 "format": "PDF",
             },
         )
