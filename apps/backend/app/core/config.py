@@ -63,6 +63,8 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: Optional[str] = Field(default=None)
     ANTHROPIC_API_KEY: Optional[str] = Field(default=None)
     GEMINI_API_KEY: Optional[str] = Field(default=None)
+    GOOGLE_API_KEY: Optional[str] = Field(default=None)
+    GOOGLE_GEMINI_API_KEY: Optional[str] = Field(default=None)
     GROQ_API_KEY: Optional[str] = Field(default=None)
     OPENROUTER_API_KEY: Optional[str] = Field(default=None)
     OLLAMA_BASE_URL: str = Field(default="http://localhost:11434")

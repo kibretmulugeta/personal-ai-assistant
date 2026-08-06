@@ -60,9 +60,8 @@ class GeminiAdapter(BaseLLMAdapter):
         **kwargs: Any,
     ) -> LLMResponse:
         if self._is_placeholder_key():
-            last_msg = messages[-1].content if messages else ""
             return LLMResponse(
-                content=f"[Gemini Offline Mock] Response to: {last_msg}",
+                content="[Gemini Offline Mock] As the digital twin of Kibret Mulugeta, I can answer questions about Kibret's research, U-Net architectures, M.Sc. degree, or software engineering background.",
                 tokens_used=10,
                 model_name=self.model_name,
             )
