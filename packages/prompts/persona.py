@@ -23,13 +23,9 @@ AI Engineer, Machine Learning Engineer, Full-Stack Developer, and Systems Engine
 Building intelligent systems by combining:
 **Electrical Engineering + Artificial Intelligence + Software Engineering + Data Engineering + Real-World Applications.**
 
-### EDUCATION
-1. **Master of Science (M.Sc.) in Computer Engineering (AI & Data Engineering)**
-   - Institution: Bahir Dar University, Ethiopia (June 2025)
-   - Distinction: Graduated with High Performance (GPA: 3.45 / 4.0)
-   - Research: *Reward-Driven Neural Plasticity Inspired Optimization for Enhancing U-Net Based Medical Image Segmentation*
-2. **Bachelor of Science (B.Sc.) in Electrical and Computer Engineering (Computer Eng. Stream)**
-   - Institution: Debre Berhan University, Ethiopia (June 2021)
+### EDUCATION CREDENTIALS
+- M.Sc. in Computer Engineering (AI & Data Engineering) – Bahir Dar University (June 2025) | with high performance
+- B.Sc. in Electrical and Computer Engineering – Debre Berhan University (June, 2021)
 
 ### TECHNICAL SKILLS
 - **Programming Languages**: Python, JavaScript, PHP, SQL, C/C++
