@@ -1,6 +1,6 @@
 /**
  * Personal Website AI Assistant - Embeddable Floating Widget
- * Digital Twin of Alemu Kibret Mulugeta
+ * Digital Twin of Kibret Mulugeta
  * Version: 1.0.0
  */
 
@@ -14,7 +14,7 @@
       theme: 'dark',
       position: 'bottom-right',
       primaryColor: '#6366f1',
-      welcomeMessage: "Hello! I am the AI Digital Twin of Alemu Kibret Mulugeta. Ask me about Alemu's research, projects, skills, or download his resume!",
+      welcomeMessage: "Hello! I am the AI Digital Twin of Kibret Mulugeta. Ask me about Kibret's research, projects, skills, or download his resume!",
     },
     state: {
       isOpen: false,
@@ -56,95 +56,88 @@
         <div class="wa-chat-panel" id="wa-chat-panel">
           <div class="wa-header">
             <div class="wa-header-info">
-              <div class="wa-avatar">AK</div>
+              <div class="wa-avatar">KM</div>
               <div>
-                <h4 class="wa-title">Alemu Kibret AI</h4>
-                <p class="wa-subtitle">Digital Twin • Online</p>
+                <div class="wa-title">Kibret Mulugeta AI</div>
+                <div class="wa-subtitle">Digital Twin • Online</div>
               </div>
             </div>
             <div class="wa-header-actions">
-              <button class="wa-icon-btn" id="wa-theme-btn" title="Toggle Theme">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-              </button>
-              <button class="wa-icon-btn" id="wa-reset-btn" title="Reset Chat">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-              </button>
-              <button class="wa-icon-btn" id="wa-close-btn" title="Close">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
+              <button class="wa-icon-btn" id="wa-theme-btn" title="Toggle Theme">☀️</button>
+              <button class="wa-icon-btn" id="wa-reset-btn" title="Reset Chat">🔄</button>
+              <button class="wa-icon-btn" id="wa-close-btn" title="Close Panel">✕</button>
+            </div>
+          </div>
+          <div class="wa-body" id="wa-chat-body"></div>
+          <div class="wa-footer">
+            <div class="wa-input-wrapper">
+              <textarea id="wa-chat-input" placeholder="Ask about research, projects, skills..." rows="1"></textarea>
+              <button id="wa-send-btn" aria-label="Send message">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
               </button>
             </div>
           </div>
-          <div class="wa-body" id="wa-body"></div>
-          <div class="wa-footer">
-            <input type="text" class="wa-input" id="wa-input" placeholder="Ask about research, projects, skills..." />
-            <button class="wa-send-btn" id="wa-send-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-            </button>
-          </div>
         </div>
-        <button class="wa-toggle-btn" id="wa-toggle-btn">
-          <div class="wa-badge"></div>
-          <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+        <button class="wa-toggle-btn" id="wa-toggle-btn" aria-label="Open AI Assistant">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
         </button>
       `;
 
       document.body.appendChild(container);
 
-      this.elements = {
-        container: container,
-        panel: document.getElementById('wa-chat-panel'),
-        toggleBtn: document.getElementById('wa-toggle-btn'),
-        closeBtn: document.getElementById('wa-close-btn'),
-        themeBtn: document.getElementById('wa-theme-btn'),
-        resetBtn: document.getElementById('wa-reset-btn'),
-        body: document.getElementById('wa-body'),
-        input: document.getElementById('wa-input'),
-        sendBtn: document.getElementById('wa-send-btn'),
-      };
+      this.elements.container = container;
+      this.elements.panel = container.querySelector('#wa-chat-panel');
+      this.elements.toggleBtn = container.querySelector('#wa-toggle-btn');
+      this.elements.closeBtn = container.querySelector('#wa-close-btn');
+      this.elements.resetBtn = container.querySelector('#wa-reset-btn');
+      this.elements.themeBtn = container.querySelector('#wa-theme-btn');
+      this.elements.body = container.querySelector('#wa-chat-body');
+      this.elements.input = container.querySelector('#wa-chat-input');
+      this.elements.sendBtn = container.querySelector('#wa-send-btn');
     },
 
     bindEvents: function () {
       var self = this;
 
       self.elements.toggleBtn.addEventListener('click', function () {
-        self.toggleWidget();
+        self.togglePanel();
       });
+
       self.elements.closeBtn.addEventListener('click', function () {
-        self.toggleWidget(false);
+        self.togglePanel(false);
       });
-      self.elements.themeBtn.addEventListener('click', function () {
-        self.toggleTheme();
-      });
+
       self.elements.resetBtn.addEventListener('click', function () {
         self.resetChat();
       });
+
+      self.elements.themeBtn.addEventListener('click', function () {
+        var currentTheme = self.elements.container.getAttribute('data-theme');
+        var newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        self.elements.container.setAttribute('data-theme', newTheme);
+      });
+
       self.elements.sendBtn.addEventListener('click', function () {
         self.handleSend();
       });
+
       self.elements.input.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
           self.handleSend();
         }
       });
     },
 
-    toggleWidget: function (open) {
-      if (typeof open === 'boolean') {
-        this.state.isOpen = open;
+    togglePanel: function (open) {
+      var self = this;
+      self.state.isOpen = open !== undefined ? open : !self.state.isOpen;
+      if (self.state.isOpen) {
+        self.elements.panel.classList.add('wa-open');
+        self.elements.input.focus();
       } else {
-        this.state.isOpen = !this.state.isOpen;
+        self.elements.panel.classList.remove('wa-open');
       }
-      if (this.state.isOpen) {
-        this.elements.panel.classList.add('wa-open');
-        this.elements.input.focus();
-      } else {
-        this.elements.panel.classList.remove('wa-open');
-      }
-    },
-
-    toggleTheme: function () {
-      this.config.theme = this.config.theme === 'dark' ? 'light' : 'dark';
-      this.elements.container.setAttribute('data-theme', this.config.theme);
     },
 
     addWelcomeMessage: function () {
@@ -159,11 +152,11 @@
     },
 
     handleSend: function () {
-      var text = this.elements.input.value.strip ? this.elements.input.value.trim() : this.elements.input.value;
+      var text = this.elements.input.value.trim();
       if (!text || this.state.isStreaming) return;
 
-      this.elements.input.value = '';
       this.appendMessage('user', text);
+      this.elements.input.value = '';
       this.streamResponse(text);
     },
 
@@ -181,6 +174,33 @@
 
       this.state.messages.push({ role: role, content: content });
       return bubble;
+    },
+
+    fetchFallbackResponse: function (query, typingDiv) {
+      var self = this;
+      fetch(self.config.apiEndpoint + '/chat/message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: query, session_id: self.state.sessionId }),
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (typingDiv && typingDiv.parentNode) {
+            self.elements.body.removeChild(typingDiv);
+          }
+          var b = self.appendMessage('assistant', data.response || 'No response received.');
+          if (data.action) {
+            self.renderActionCard(b, data.action);
+          }
+          self.state.isStreaming = false;
+        })
+        .catch(function (err) {
+          if (typingDiv && typingDiv.parentNode) {
+            self.elements.body.removeChild(typingDiv);
+          }
+          self.appendMessage('assistant', 'Sorry, I encountered an issue connecting to the AI Digital Twin service.');
+          self.state.isStreaming = false;
+        });
     },
 
     streamResponse: function (query) {
@@ -211,7 +231,9 @@
             var data = JSON.parse(event.data);
             if (data.type === 'content' && data.delta) {
               if (!responseBubble) {
-                self.elements.body.removeChild(typingDiv);
+                if (typingDiv && typingDiv.parentNode) {
+                  self.elements.body.removeChild(typingDiv);
+                }
                 responseBubble = self.appendMessage('assistant', '');
               }
               accumulatedText += data.delta;
@@ -232,90 +254,67 @@
         es.onerror = function () {
           es.close();
           if (!responseBubble) {
-            self.elements.body.removeChild(typingDiv);
-            self.appendMessage('assistant', 'Sorry, I encountered an issue connecting to the digital twin service.');
+            // Fallback to standard POST request if SSE fails or buffers on Vercel
+            self.fetchFallbackResponse(query, typingDiv);
+          } else {
+            self.state.isStreaming = false;
           }
-          self.state.isStreaming = false;
         };
       } else {
-        // Fallback to standard fetch
-        fetch(self.config.apiEndpoint + '/chat/message', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: query, session_id: self.state.sessionId }),
-        })
-          .then(function (res) { return res.json(); })
-          .then(function (data) {
-            self.elements.body.removeChild(typingDiv);
-            var b = self.appendMessage('assistant', data.response || 'No response.');
-            if (data.action) {
-              self.renderActionCard(b, data.action);
-            }
-            self.state.isStreaming = false;
-          })
-          .catch(function () {
-            self.elements.body.removeChild(typingDiv);
-            self.appendMessage('assistant', 'Sorry, an error occurred.');
-            self.state.isStreaming = false;
-          });
+        self.fetchFallbackResponse(query, typingDiv);
       }
     },
 
     renderActionCard: function (containerBubble, action) {
       if (!action || !action.name) return;
+
       var card = document.createElement('div');
       card.className = 'wa-action-card';
 
-      if (action.name === 'download_resume' && action.data && action.data.download_url) {
+      if (action.name === 'download_resume' || action.name === 'download_cv') {
+        var url = (action.data && action.data.download_url) ? action.data.download_url : 'https://interactive-portfolio-pied-three.vercel.app/api/resume/download';
         card.innerHTML = `
-          <div class="wa-action-title">📄 Resume Ready for Download</div>
-          <a class="wa-btn" href="${action.data.download_url}" target="_blank" download>Download Resume (PDF)</a>
+          <div class="wa-card-title">📄 Professional Resume / CV</div>
+          <div class="wa-card-desc">Click below to download Kibret Mulugeta's official resume PDF.</div>
+          <a href="${url}" target="_blank" rel="noopener noreferrer" class="wa-btn-primary">Download Resume (PDF)</a>
         `;
-      } else if (action.name === 'list_projects' && action.data && action.data.projects) {
-        var items = action.data.projects.map(function(p) {
-          return `<div style="margin-bottom:6px;"><strong>${p.title}</strong><br/><small>${p.tech_stack.join(', ')}</small></div>`;
-        }).join('');
-        card.innerHTML = `<div class="wa-action-title">🚀 Featured Projects</div>${items}`;
+      } else if (action.name === 'submit_contact_form') {
+        card.innerHTML = `
+          <div class="wa-card-title">✉️ Get in Touch</div>
+          <div class="wa-card-desc">Send an email directly to Kibret Mulugeta.</div>
+          <a href="mailto:Kibretmail@gmail.com" class="wa-btn-primary">Send Email</a>
+        `;
+      } else if (action.name === 'list_projects') {
+        card.innerHTML = `
+          <div class="wa-card-title">💻 Explore Projects</div>
+          <div class="wa-card-desc">Visit Kibret Mulugeta's GitHub repositories and interactive portfolio.</div>
+          <a href="https://github.com/kibretmulugeta" target="_blank" rel="noopener noreferrer" class="wa-btn-primary">View GitHub Profile</a>
+        `;
+      } else {
+        return;
       }
 
       containerBubble.appendChild(card);
     },
 
-    parseMarkdown: function (text) {
-      if (!text) return '';
-
-      // Escape basic HTML
-      var escaped = text
+    parseMarkdown: function (str) {
+      if (!str) return '';
+      var html = str
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-
-      // Code blocks ```code```
-      escaped = escaped.replace(/```([\s\S]*?)```/g, function (match, p1) {
-        return `<div class="wa-code-block">
-          <div class="wa-code-header">
-            <span>Code</span>
-            <button class="wa-copy-btn" onclick="navigator.clipboard.writeText(this.parentNode.nextElementSibling.innerText)">Copy</button>
-          </div>
-          <pre class="wa-code-content"><code>${p1.trim()}</code></pre>
-        </div>`;
-      });
-
-      // Inline code `code`
-      escaped = escaped.replace(/`([^`]+)`/g, '<code>$1</code>');
-
-      // Bold **text**
-      escaped = escaped.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-
-      // Italics *text*
-      escaped = escaped.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-
-      // Newlines to <br/>
-      return escaped.replace(/\n/g, '<br/>');
+        .replace(/>/g, '&gt;')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\n\n/g, '<br><br>')
+        .replace(/\n/g, '<br>');
+      return html;
     },
 
     scrollToBottom: function () {
-      this.elements.body.scrollTop = this.elements.body.scrollHeight;
+      if (this.elements.body) {
+        this.elements.body.scrollTop = this.elements.body.scrollHeight;
+      }
     },
   };
 

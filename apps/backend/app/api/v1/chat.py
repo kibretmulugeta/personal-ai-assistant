@@ -148,7 +148,15 @@ async def chat_stream(
 
         yield f"data: {json.dumps({'type': 'done'})}\n\n"
 
-    return StreamingResponse(sse_event_generator(), media_type="text/event-stream")
+    return StreamingResponse(
+        sse_event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @router.websocket("/ws")
