@@ -33,9 +33,8 @@ class GeminiAdapter(BaseLLMAdapter):
                 role = "user" if m.role == "user" else "model"
                 contents.append({"role": role, "parts": [{"text": m.content}]})
 
-        # Ensure at least one user content item
         if not contents:
-            contents.append({"role": role if 'role' in locals() else "user", "parts": [{"text": "Hello"}]})
+            contents.append({"role": "user", "parts": [{"text": "Hello"}]})
 
         payload = {
             "contents": contents,
@@ -90,6 +89,15 @@ class GeminiAdapter(BaseLLMAdapter):
                     model_name=self.model_name,
                     raw_response=data,
                 )
+        except httpx.HTTPStatusError as e:
+            from apps.backend.app.core.logging import get_logger
+            logger = get_logger("llm.gemini")
+            logger.error(f"Gemini API HTTP Error {e.response.status_code}: {e.response.text}", exc_info=True)
+            return LLMResponse(
+                content=f"Unable to generate response (Google Gemini API HTTP {e.response.status_code}). Please verify that GEMINI_API_KEY in Vercel settings is valid.",
+                tokens_used=0,
+                model_name=self.model_name,
+            )
         except Exception as e:
             from apps.backend.app.core.logging import get_logger
             logger = get_logger("llm.gemini")
@@ -135,6 +143,13 @@ class GeminiAdapter(BaseLLMAdapter):
                                             yield part["text"]
                             except (json.JSONDecodeError, KeyError, IndexError):
                                 continue
+        except httpx.HTTPStatusError as e:
+            from apps.backend.app.core.logging import get_logger
+            logger = get_logger("llm.gemini")
+            logger.error(f"Gemini API HTTP Error {e.response.status_code}: {e.response.text}", exc_info=True)
+            fallback_text = f"Unable to generate response (Google Gemini API HTTP {e.response.status_code}). Please verify that GEMINI_API_KEY in Vercel settings is valid."
+            for token in fallback_text.split():
+                yield token + " "
         except Exception as e:
             from apps.backend.app.core.logging import get_logger
             logger = get_logger("llm.gemini")

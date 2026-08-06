@@ -34,7 +34,7 @@ class OpenAIAdapter(BaseLLMAdapter):
     ) -> LLMResponse:
         if self._is_placeholder_key():
             return LLMResponse(
-                content="[OpenAI Offline Mock] As the digital twin of Alemu Kibret Mulugeta, I can answer questions about Alemu's research in stroke lesion segmentation, U-Net architectures, M.Sc. degree from Bahir Dar University, or software engineering background.",
+                content="[OpenAI Offline Mock] As the digital twin of Kibret Mulugeta, I can answer questions about Kibret's research in stroke lesion segmentation, U-Net architectures, M.Sc. degree from Bahir Dar University, or software engineering background.",
                 tokens_used=25,
                 model_name=self.model_name,
             )
@@ -64,6 +64,15 @@ class OpenAIAdapter(BaseLLMAdapter):
                 content = data["choices"][0]["message"]["content"]
                 tokens = data.get("usage", {}).get("total_tokens", 0)
                 return LLMResponse(content=content, tokens_used=tokens, model_name=self.model_name)
+        except httpx.HTTPStatusError as e:
+            from apps.backend.app.core.logging import get_logger
+            logger = get_logger("llm.openai")
+            logger.error(f"OpenAI API HTTP Error {e.response.status_code}: {e.response.text}", exc_info=True)
+            return LLMResponse(
+                content=f"Unable to generate response (OpenAI API HTTP {e.response.status_code}). Please set ACTIVE_LLM_PROVIDER=google_gemini and GEMINI_API_KEY in your Vercel settings.",
+                tokens_used=0,
+                model_name=self.model_name,
+            )
         except Exception as e:
             from apps.backend.app.core.logging import get_logger
             logger = get_logger("llm.openai")
@@ -81,7 +90,7 @@ class OpenAIAdapter(BaseLLMAdapter):
         **kwargs: Any,
     ) -> AsyncGenerator[str, None]:
         if self._is_placeholder_key():
-            mock_tokens = ["Hello! ", "I am ", "Alemu's ", "AI ", "Digital ", "Twin."]
+            mock_tokens = ["Hello! ", "I am ", "Kibret's ", "AI ", "Digital ", "Twin."]
             for token in mock_tokens:
                 yield token
             return
@@ -115,12 +124,19 @@ class OpenAIAdapter(BaseLLMAdapter):
                                 break
                             import json
                             try:
-                                chunk = json.loads(data_str)
+                                chunk.loads(data_str)
                                 delta = chunk["choices"][0]["delta"].get("content", "")
                                 if delta:
                                     yield delta
                             except Exception:
                                 pass
+        except httpx.HTTPStatusError as e:
+            from apps.backend.app.core.logging import get_logger
+            logger = get_logger("llm.openai")
+            logger.error(f"OpenAI API HTTP Error {e.response.status_code}: {e.response.text}", exc_info=True)
+            fallback_text = f"Unable to generate response (OpenAI API HTTP {e.response.status_code}). Please set ACTIVE_LLM_PROVIDER=google_gemini and GEMINI_API_KEY in your Vercel settings."
+            for token in fallback_text.split():
+                yield token + " "
         except Exception as e:
             from apps.backend.app.core.logging import get_logger
             logger = get_logger("llm.openai")

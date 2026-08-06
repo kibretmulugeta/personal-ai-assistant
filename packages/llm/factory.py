@@ -14,7 +14,7 @@ from packages.llm.openrouter_adapter import OpenRouterAdapter
 
 
 class LLMFactory:
-    """Factory for instantiating LLM adapters."""
+    """Factory for instantiating LLM adapters with smart provider auto-detection."""
 
     @staticmethod
     def get_adapter(provider_name: Optional[str] = None) -> BaseLLMAdapter:
@@ -27,22 +27,22 @@ class LLMFactory:
         Returns:
             An instance of BaseLLMAdapter.
         """
-        provider = (provider_name or settings.ACTIVE_LLM_PROVIDER).lower()
+        raw_provider = provider_name or settings.ACTIVE_LLM_PROVIDER
+        provider = (raw_provider or "").lower().strip()
 
-        if provider == "openai":
-            return OpenAIAdapter(
-                model_name="gpt-4o-mini",
-                api_key=settings.OPENAI_API_KEY or "",
+        # Auto-detect Gemini if GEMINI_API_KEY is configured and provider is default or gemini
+        gemini_key = settings.GEMINI_API_KEY or ""
+        openai_key = settings.OPENAI_API_KEY or ""
+
+        if provider in ["google_gemini", "gemini"] or (gemini_key and not openai_key):
+            return GeminiAdapter(
+                model_name="gemini-1.5-flash",
+                api_key=gemini_key,
             )
         elif provider == "anthropic":
             return AnthropicAdapter(
                 model_name="claude-3-5-sonnet-20240620",
                 api_key=settings.ANTHROPIC_API_KEY or "",
-            )
-        elif provider in ["google_gemini", "gemini"]:
-            return GeminiAdapter(
-                model_name="gemini-1.5-flash",
-                api_key=settings.GEMINI_API_KEY or "",
             )
         elif provider == "groq":
             return GroqAdapter(
@@ -59,9 +59,19 @@ class LLMFactory:
                 model_name="llama3:latest",
                 base_url=settings.OLLAMA_BASE_URL,
             )
-        else:
-            # Fallback to OpenAI adapter
+        elif provider == "openai" or openai_key:
             return OpenAIAdapter(
                 model_name="gpt-4o-mini",
-                api_key=settings.OPENAI_API_KEY or "",
+                api_key=openai_key,
+            )
+        else:
+            # Fallback to Gemini if key available, otherwise OpenAI
+            if gemini_key:
+                return GeminiAdapter(
+                    model_name="gemini-1.5-flash",
+                    api_key=gemini_key,
+                )
+            return OpenAIAdapter(
+                model_name="gpt-4o-mini",
+                api_key=openai_key,
             )
