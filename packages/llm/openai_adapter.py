@@ -119,5 +119,6 @@ class OpenAIAdapter(BaseLLMAdapter):
                             except Exception:
                                 pass
         except Exception:
-            for token in ["Hello! ", "I am ", "Alemu's ", "AI ", "Digital ", "Twin."]:
-                yield token
+            fallback_text = "As Alemu's AI Digital Twin, I can share that Alemu Kibret Mulugeta is an AI Engineer and Medical Imaging Researcher specializing in U-Net brain MRI segmentation and deep learning systems."
+            for token in fallback_text.split():
+                yield token + " "

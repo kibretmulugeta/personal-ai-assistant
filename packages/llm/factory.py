@@ -41,7 +41,7 @@ class LLMFactory:
             )
         elif provider in ["google_gemini", "gemini"]:
             return GeminiAdapter(
-                model_name="gemini-3.5-flash",
+                model_name="gemini-1.5-flash",
                 api_key=settings.GEMINI_API_KEY or "",
             )
         elif provider == "groq":

@@ -12,7 +12,7 @@ from packages.llm.base import BaseLLMAdapter, LLMMessage, LLMResponse
 class GeminiAdapter(BaseLLMAdapter):
     """Google Gemini API adapter supporting Gemini 1.5 Pro, Gemini 1.5 Flash."""
 
-    def __init__(self, model_name: str = "gemini-3.5-flash", api_key: str = "") -> None:
+    def __init__(self, model_name: str = "gemini-1.5-flash", api_key: str = "") -> None:
         super().__init__(model_name=model_name, api_key=api_key)
         self.base_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent"
 
