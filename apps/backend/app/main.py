@@ -112,14 +112,14 @@ def create_application() -> FastAPI:
     async def get_widget_js():
         js_file = WIDGET_DIR / "widget.js"
         if js_file.exists():
-            return FileResponse(js_file, media_type="application/javascript", headers={"Cache-Control": "no-cache"})
+            return FileResponse(js_file, media_type="application/javascript", headers={"Cache-Control": "no-cache, no-store, must-revalidate, max-age=0"})
         return JSONResponse(status_code=404, content={"message": "Widget JS not found"})
 
     @app.get("/widget.css", tags=["System"])
     async def get_widget_css():
         css_file = WIDGET_DIR / "widget.css"
         if css_file.exists():
-            return FileResponse(css_file, media_type="text/css", headers={"Cache-Control": "no-cache"})
+            return FileResponse(css_file, media_type="text/css", headers={"Cache-Control": "no-cache, no-store, must-revalidate, max-age=0"})
         return JSONResponse(status_code=404, content={"message": "Widget CSS not found"})
 
     @app.get("/demo", response_class=HTMLResponse, tags=["System"])
