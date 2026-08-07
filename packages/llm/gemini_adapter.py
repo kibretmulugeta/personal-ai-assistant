@@ -10,11 +10,12 @@ from packages.llm.base import BaseLLMAdapter, LLMMessage, LLMResponse
 
 
 class GeminiAdapter(BaseLLMAdapter):
-    """Google Gemini API adapter supporting Gemini 1.5 Pro, Gemini 1.5 Flash."""
+    """Google Gemini API adapter supporting Gemini 2.0 Flash, Gemini 1.5 Pro."""
 
-    def __init__(self, model_name: str = "gemini-1.5-flash", api_key: str = "") -> None:
+    def __init__(self, model_name: str = "gemini-2.0-flash", api_key: str = "") -> None:
         super().__init__(model_name=model_name, api_key=api_key)
         self.base_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent"
+
 
     def _is_placeholder_key(self) -> bool:
         return not self.api_key or "your-" in self.api_key or len(self.api_key.strip()) < 10
@@ -132,8 +133,7 @@ class GeminiAdapter(BaseLLMAdapter):
                 yield token + " "
             return
 
-        candidate_models = [self.model_name, "gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro"]
-        # Deduplicate while preserving order
+        candidate_models = ["gemini-2.0-flash", self.model_name, "gemini-2.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro"]
         candidate_models = list(dict.fromkeys(candidate_models))
 
         for model in candidate_models:
@@ -169,7 +169,10 @@ class GeminiAdapter(BaseLLMAdapter):
                     err_body = str(e)
                 logger.error(f"Gemini API HTTP Error {e.response.status_code}: {err_body}", exc_info=True)
                 if model == candidate_models[-1]:
-                    fallback_text = f"Unable to generate response (Google Gemini API HTTP {e.response.status_code}). Please verify that GEMINI_API_KEY setting is valid."
+                    if e.response.status_code == 429:
+                        fallback_text = "Google Gemini API rate limit / quota exceeded (HTTP 429). Please try again in a few moments or use a key with available quota."
+                    else:
+                        fallback_text = f"Unable to generate response (Google Gemini API HTTP {e.response.status_code}). Please verify your GEMINI_API_KEY."
                     for token in fallback_text.split():
                         yield token + " "
                     return
@@ -182,4 +185,5 @@ class GeminiAdapter(BaseLLMAdapter):
                     for token in fallback_text.split():
                         yield token + " "
                     return
+
 
