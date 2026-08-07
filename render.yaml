@@ -8,10 +8,12 @@ services:
     env: python
     region: oregon
     plan: starter
-    buildCommand: "pip install -r apps/backend/requirements.txt"
+    buildCommand: "pip install -r requirements.txt && pip install -e ."
     startCommand: "uvicorn apps.backend.app.main:app --host 0.0.0.0 --port $PORT"
     healthCheckPath: /api/v1/health/liveness
     envVars:
+      - key: PYTHONPATH
+        value: "."
       - key: PYTHON_VERSION
         value: "3.13.0"
       - key: APP_ENV
@@ -32,7 +34,7 @@ services:
           name: digital-twin-redis
           property: connectionString
       - key: ACTIVE_LLM_PROVIDER
-        value: openai
+        value: google_gemini
       - key: ACTIVE_EMBEDDING_PROVIDER
         value: openai
 
