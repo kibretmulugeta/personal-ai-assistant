@@ -12,10 +12,6 @@ license = "MIT"
 authors = [
     { name = "Alemu Kibret Mulugeta", email = "alemu.kibret@example.com" }
 ]
-
-[tool.setuptools]
-packages = ["apps", "packages", "api"]
-
 dependencies = [
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.30.0",
@@ -64,4 +60,8 @@ entrypoint = "apps.backend.app.main:app"
 
 [tool.uv]
 package = false
+
+[tool.setuptools]
+packages = ["apps", "packages", "api"]
+
 
