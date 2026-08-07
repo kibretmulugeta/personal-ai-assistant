@@ -8,10 +8,15 @@ version = "0.1.0"
 description = "Production-ready standalone AI assistant and digital twin of Alemu Kibret Mulugeta"
 readme = "README.md"
 requires-python = ">=3.13"
-license = { text = "MIT" }
+license = "MIT"
 authors = [
     { name = "Alemu Kibret Mulugeta", email = "alemu.kibret@example.com" }
 ]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["apps*", "packages*"]
+
 dependencies = [
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.30.0",
