@@ -13,6 +13,7 @@ class GroqAdapter(BaseLLMAdapter):
     def __init__(self, model_name: str = "llama-3.3-70b-versatile", api_key: str = "") -> None:
         super().__init__(model_name=model_name, api_key=api_key)
         self.openai_delegate = OpenAIAdapter(model_name=model_name, api_key=api_key)
+        self.openai_delegate.api_url = "https://api.groq.com/openai/v1/chat/completions"
         self.openai_delegate.base_url = "https://api.groq.com/openai/v1/chat/completions"
 
     async def generate(
