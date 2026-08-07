@@ -41,38 +41,50 @@ class LLMFactory:
             or os.getenv("GOOGLE_GEMINI_API_KEY")
             or ""
         )
-        openai_key = settings.OPENAI_API_KEY or os.getenv("OPENAI_API_KEY") or ""
+        groq_key = settings.GROQ_API_KEY or os.getenv("GROQ_API_KEY") or ""
+        anthropic_key = settings.ANTHROPIC_API_KEY or os.getenv("ANTHROPIC_API_KEY") or ""
+        openrouter_key = settings.OPENROUTER_API_KEY or os.getenv("OPENROUTER_API_KEY") or ""
 
-        if provider in ["google_gemini", "gemini"] or (gemini_key and not openai_key):
+        if provider == "groq" or (groq_key and not provider):
+            return GroqAdapter(
+                model_name="llama-3.3-70b-versatile",
+                api_key=groq_key,
+            )
+        elif provider in ["google_gemini", "gemini"]:
             return GeminiAdapter(
-                model_name="gemini-1.5-flash",
+                model_name="gemini-2.0-flash",
                 api_key=gemini_key,
             )
         elif provider == "anthropic":
             return AnthropicAdapter(
                 model_name="claude-3-5-sonnet-20240620",
-                api_key=settings.ANTHROPIC_API_KEY or os.getenv("ANTHROPIC_API_KEY") or "",
-            )
-        elif provider == "groq":
-            return GroqAdapter(
-                model_name="llama-3.1-70b-versatile",
-                api_key=settings.GROQ_API_KEY or os.getenv("GROQ_API_KEY") or "",
+                api_key=anthropic_key,
             )
         elif provider == "openrouter":
             return OpenRouterAdapter(
                 model_name="meta-llama/llama-3.1-70b-instruct",
-                api_key=settings.OPENROUTER_API_KEY or os.getenv("OPENROUTER_API_KEY") or "",
+                api_key=openrouter_key,
             )
         elif provider == "ollama":
             return OllamaAdapter(
                 model_name="llama3:latest",
                 base_url=settings.OLLAMA_BASE_URL,
             )
+        elif provider == "openai":
+            return OpenAIAdapter(
+                model_name="gpt-4o-mini",
+                api_key=openai_key,
+            )
         else:
-            # Fallback priority: if gemini_key exists, use Gemini; else OpenAI
-            if gemini_key:
+            # Fallback priority: Groq > Gemini > OpenAI
+            if groq_key:
+                return GroqAdapter(
+                    model_name="llama-3.3-70b-versatile",
+                    api_key=groq_key,
+                )
+            elif gemini_key:
                 return GeminiAdapter(
-                    model_name="gemini-1.5-flash",
+                    model_name="gemini-2.0-flash",
                     api_key=gemini_key,
                 )
             return OpenAIAdapter(
