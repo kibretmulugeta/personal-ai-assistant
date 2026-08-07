@@ -51,7 +51,7 @@ class Settings(BaseSettings):
     # Active AI Providers
     ACTIVE_LLM_PROVIDER: Literal[
         "openai", "anthropic", "google_gemini", "gemini", "groq", "openrouter", "ollama"
-    ] = Field(default="google_gemini")
+    ] = Field(default="groq")
 
     ACTIVE_EMBEDDING_PROVIDER: Literal[
         "openai", "bge", "e5", "sentence_transformers"
