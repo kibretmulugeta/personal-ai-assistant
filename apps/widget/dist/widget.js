@@ -78,7 +78,11 @@
             </div>
           </div>
         </div>
-        <button class="wa-toggle-btn" id="wa-toggle-btn" aria-label="Open AI Assistant">
+        <div class="wa-teaser-bubble" id="wa-teaser-bubble">
+          <span class="wa-teaser-text">Ask Kibret's AI Twin anything! 👋</span>
+          <button class="wa-teaser-close" id="wa-teaser-close" aria-label="Close bubble">✕</button>
+        </div>
+        <button class="wa-toggle-btn wa-pulsing" id="wa-toggle-btn" aria-label="Open AI Assistant">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
         </button>
       `;
@@ -88,16 +92,38 @@
       this.elements.container = container;
       this.elements.panel = container.querySelector('#wa-chat-panel');
       this.elements.toggleBtn = container.querySelector('#wa-toggle-btn');
+      this.elements.teaserBubble = container.querySelector('#wa-teaser-bubble');
+      this.elements.teaserClose = container.querySelector('#wa-teaser-close');
       this.elements.closeBtn = container.querySelector('#wa-close-btn');
       this.elements.resetBtn = container.querySelector('#wa-reset-btn');
       this.elements.themeBtn = container.querySelector('#wa-theme-btn');
       this.elements.body = container.querySelector('#wa-chat-body');
       this.elements.input = container.querySelector('#wa-chat-input');
       this.elements.sendBtn = container.querySelector('#wa-send-btn');
+
+      this.initAttentionTimer();
+    },
+
+    initAttentionTimer: function () {
+      var self = this;
+      setTimeout(function () {
+        if (!self.state.isOpen && self.elements.teaserBubble) {
+          self.elements.teaserBubble.classList.add('wa-visible');
+        }
+      }, 2500);
     },
 
     bindEvents: function () {
       var self = this;
+
+      if (self.elements.teaserClose) {
+        self.elements.teaserClose.addEventListener('click', function (e) {
+          e.stopPropagation();
+          if (self.elements.teaserBubble) {
+            self.elements.teaserBubble.classList.remove('wa-visible');
+          }
+        });
+      }
 
       self.elements.toggleBtn.addEventListener('click', function () {
         self.togglePanel();
@@ -134,6 +160,10 @@
       self.state.isOpen = open !== undefined ? open : !self.state.isOpen;
       if (self.state.isOpen) {
         self.elements.panel.classList.add('wa-open');
+        self.elements.toggleBtn.classList.remove('wa-pulsing');
+        if (self.elements.teaserBubble) {
+          self.elements.teaserBubble.classList.remove('wa-visible');
+        }
         self.elements.input.focus();
       } else {
         self.elements.panel.classList.remove('wa-open');
