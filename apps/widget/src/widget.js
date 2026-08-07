@@ -71,8 +71,8 @@
           <div class="wa-body" id="wa-chat-body"></div>
           <div class="wa-footer">
             <div class="wa-input-wrapper">
-              <textarea id="wa-chat-input" placeholder="Ask about research, projects, skills..." rows="1"></textarea>
-              <button id="wa-send-btn" aria-label="Send message">
+              <textarea id="wa-chat-input" class="wa-chat-input" placeholder="Ask about research, projects, skills..." rows="1"></textarea>
+              <button id="wa-send-btn" class="wa-send-btn" aria-label="Send message">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
               </button>
             </div>
