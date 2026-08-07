@@ -124,7 +124,7 @@ class OpenAIAdapter(BaseLLMAdapter):
                                 break
                             import json
                             try:
-                                chunk.loads(data_str)
+                                chunk = json.loads(data_str)
                                 delta = chunk["choices"][0]["delta"].get("content", "")
                                 if delta:
                                     yield delta
