@@ -66,46 +66,56 @@ class GeminiAdapter(BaseLLMAdapter):
                 model_name=self.model_name,
             )
 
-        url = f"{self.base_url}?key={self.api_key}"
+        candidate_models = [self.model_name, "gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro"]
+        candidate_models = list(dict.fromkeys(candidate_models))
+
         payload = self._build_payload(messages, temperature, max_tokens, system_prompt)
 
-        try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                resp = await client.post(url, json=payload)
-                resp.raise_for_status()
-                data = resp.json()
-                
-                candidates = data.get("candidates", [])
-                if not candidates:
-                    raise ValueError("No response candidates returned by Gemini API")
+        for model in candidate_models:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={self.api_key}"
+            try:
+                async with httpx.AsyncClient(timeout=30.0) as client:
+                    resp = await client.post(url, json=payload)
+                    if resp.status_code == 404 and model != candidate_models[-1]:
+                        continue  # Try next model fallback
+                    resp.raise_for_status()
+                    data = resp.json()
+                    
+                    candidates = data.get("candidates", [])
+                    if not candidates:
+                        raise ValueError("No response candidates returned by Gemini API")
 
-                content = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
-                tokens = data.get("usageMetadata", {}).get("totalTokenCount", 0)
+                    content = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+                    tokens = data.get("usageMetadata", {}).get("totalTokenCount", 0)
 
-                return LLMResponse(
-                    content=content,
-                    tokens_used=tokens,
-                    model_name=self.model_name,
-                    raw_response=data,
-                )
-        except httpx.HTTPStatusError as e:
-            from apps.backend.app.core.logging import get_logger
-            logger = get_logger("llm.gemini")
-            logger.error(f"Gemini API HTTP Error {e.response.status_code}: {e.response.text}", exc_info=True)
-            return LLMResponse(
-                content=f"Unable to generate response (Google Gemini API HTTP {e.response.status_code}). Please verify that GEMINI_API_KEY in Vercel settings is valid.",
-                tokens_used=0,
-                model_name=self.model_name,
-            )
-        except Exception as e:
-            from apps.backend.app.core.logging import get_logger
-            logger = get_logger("llm.gemini")
-            logger.error(f"Gemini LLM generation API error: {e}", exc_info=True)
-            return LLMResponse(
-                content=f"I am unable to generate a response right now due to a Gemini provider connection error ({type(e).__name__}). Please check your GEMINI_API_KEY configuration.",
-                tokens_used=0,
-                model_name=self.model_name,
-            )
+                    return LLMResponse(
+                        content=content,
+                        tokens_used=tokens,
+                        model_name=model,
+                        raw_response=data,
+                    )
+            except httpx.HTTPStatusError as e:
+                from apps.backend.app.core.logging import get_logger
+                logger = get_logger("llm.gemini")
+                err_text = e.response.text if hasattr(e.response, "text") else str(e)
+                logger.error(f"Gemini API HTTP Error {e.response.status_code}: {err_text}", exc_info=True)
+                if model == candidate_models[-1]:
+                    return LLMResponse(
+                        content=f"Unable to generate response (Google Gemini API HTTP {e.response.status_code}). Please verify that GEMINI_API_KEY setting is valid.",
+                        tokens_used=0,
+                        model_name=self.model_name,
+                    )
+            except Exception as e:
+                from apps.backend.app.core.logging import get_logger
+                logger = get_logger("llm.gemini")
+                logger.error(f"Gemini LLM generation API error: {e}", exc_info=True)
+                if model == candidate_models[-1]:
+                    return LLMResponse(
+                        content=f"I am unable to generate a response right now due to a Gemini provider connection error ({type(e).__name__}). Please check your GEMINI_API_KEY configuration.",
+                        tokens_used=0,
+                        model_name=self.model_name,
+                    )
+
 
     async def stream(
         self,
@@ -122,37 +132,54 @@ class GeminiAdapter(BaseLLMAdapter):
                 yield token + " "
             return
 
-        stream_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model_name}:streamGenerateContent?key={self.api_key}&alt=sse"
-        payload = self._build_payload(messages, temperature, max_tokens, system_prompt)
+        candidate_models = [self.model_name, "gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro"]
+        # Deduplicate while preserving order
+        candidate_models = list(dict.fromkeys(candidate_models))
 
-        try:
-            async with httpx.AsyncClient(timeout=60.0) as client:
-                async with client.stream("POST", stream_url, json=payload) as resp:
-                    resp.raise_for_status()
-                    async for line in resp.aiter_lines():
-                        if line.startswith("data: "):
-                            data_str = line[6:].strip()
-                            try:
-                                chunk_data = json.loads(data_str)
-                                candidates = chunk_data.get("candidates", [])
-                                if candidates:
-                                    parts = candidates[0].get("content", {}).get("parts", [])
-                                    for part in parts:
-                                        if "text" in part:
-                                            yield part["text"]
-                            except (json.JSONDecodeError, KeyError, IndexError):
-                                continue
-        except httpx.HTTPStatusError as e:
-            from apps.backend.app.core.logging import get_logger
-            logger = get_logger("llm.gemini")
-            logger.error(f"Gemini API HTTP Error {e.response.status_code}: {e.response.text}", exc_info=True)
-            fallback_text = f"Unable to generate response (Google Gemini API HTTP {e.response.status_code}). Please verify that GEMINI_API_KEY in Vercel settings is valid."
-            for token in fallback_text.split():
-                yield token + " "
-        except Exception as e:
-            from apps.backend.app.core.logging import get_logger
-            logger = get_logger("llm.gemini")
-            logger.error(f"Gemini LLM streaming API error: {e}", exc_info=True)
-            fallback_text = f"I am unable to generate a response right now due to a Gemini provider connection error ({type(e).__name__}). Please check your GEMINI_API_KEY configuration."
-            for token in fallback_text.split():
-                yield token + " "
+        for model in candidate_models:
+            stream_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:streamGenerateContent?key={self.api_key}&alt=sse"
+            payload = self._build_payload(messages, temperature, max_tokens, system_prompt)
+
+            try:
+                async with httpx.AsyncClient(timeout=60.0) as client:
+                    async with client.stream("POST", stream_url, json=payload) as resp:
+                        if resp.status_code == 404 and model != candidate_models[-1]:
+                            continue  # Try next model fallback
+                        resp.raise_for_status()
+                        async for line in resp.aiter_lines():
+                            if line.startswith("data: "):
+                                data_str = line[6:].strip()
+                                try:
+                                    chunk_data = json.loads(data_str)
+                                    candidates = chunk_data.get("candidates", [])
+                                    if candidates:
+                                        parts = candidates[0].get("content", {}).get("parts", [])
+                                        for part in parts:
+                                            if "text" in part:
+                                                yield part["text"]
+                                except (json.JSONDecodeError, KeyError, IndexError):
+                                    continue
+                        return  # Success
+            except httpx.HTTPStatusError as e:
+                from apps.backend.app.core.logging import get_logger
+                logger = get_logger("llm.gemini")
+                try:
+                    err_body = (await e.response.aread()).decode("utf-8", errors="ignore")
+                except Exception:
+                    err_body = str(e)
+                logger.error(f"Gemini API HTTP Error {e.response.status_code}: {err_body}", exc_info=True)
+                if model == candidate_models[-1]:
+                    fallback_text = f"Unable to generate response (Google Gemini API HTTP {e.response.status_code}). Please verify that GEMINI_API_KEY setting is valid."
+                    for token in fallback_text.split():
+                        yield token + " "
+                    return
+            except Exception as e:
+                from apps.backend.app.core.logging import get_logger
+                logger = get_logger("llm.gemini")
+                logger.error(f"Gemini LLM streaming API error: {e}", exc_info=True)
+                if model == candidate_models[-1]:
+                    fallback_text = f"I am unable to generate a response right now due to a Gemini provider connection error ({type(e).__name__}). Please check your GEMINI_API_KEY configuration."
+                    for token in fallback_text.split():
+                        yield token + " "
+                    return
+

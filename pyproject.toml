@@ -13,9 +13,8 @@ authors = [
     { name = "Alemu Kibret Mulugeta", email = "alemu.kibret@example.com" }
 ]
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["apps*", "packages*"]
+[tool.setuptools]
+packages = ["apps", "packages", "api"]
 
 dependencies = [
     "fastapi>=0.115.0",
