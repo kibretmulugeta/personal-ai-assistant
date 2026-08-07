@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     )
 
     # App Metadata
-    APP_NAME: str = Field(default="Alemu Kibret Mulugeta Digital Twin AI")
+    APP_NAME: str = Field(default="Kibret Mulugeta Digital Twin AI")
     APP_ENV: Literal["development", "staging", "production", "testing"] = Field(
         default="development"
     )
@@ -50,8 +50,8 @@ class Settings(BaseSettings):
 
     # Active AI Providers
     ACTIVE_LLM_PROVIDER: Literal[
-        "openai", "anthropic", "google_gemini", "groq", "openrouter", "ollama"
-    ] = Field(default="openai")
+        "openai", "anthropic", "google_gemini", "gemini", "groq", "openrouter", "ollama"
+    ] = Field(default="google_gemini")
 
     ACTIVE_EMBEDDING_PROVIDER: Literal[
         "openai", "bge", "e5", "sentence_transformers"
