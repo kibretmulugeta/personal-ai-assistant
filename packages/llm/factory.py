@@ -44,6 +44,7 @@ class LLMFactory:
         groq_key = settings.GROQ_API_KEY or os.getenv("GROQ_API_KEY") or ""
         anthropic_key = settings.ANTHROPIC_API_KEY or os.getenv("ANTHROPIC_API_KEY") or ""
         openrouter_key = settings.OPENROUTER_API_KEY or os.getenv("OPENROUTER_API_KEY") or ""
+        openai_key = settings.OPENAI_API_KEY or os.getenv("OPENAI_API_KEY") or ""
 
         if provider == "groq" or (groq_key and not provider):
             return GroqAdapter(

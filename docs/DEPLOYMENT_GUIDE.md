@@ -25,7 +25,7 @@ This document provides step-by-step instructions for deploying the standalone Di
      - FastAPI Web Service (`digital-twin-backend`).
 
 3. **Configure Environment Variables**:
-   In the Render Web Service settings, add your active provider API key (e.g. `OPENAI_API_KEY`, `GEMINI_API_KEY`, `ANTHROPIC_API_KEY`).
+   In the Render Web Service settings, add your active provider API key (e.g. `OPENAI_API_KEY`, `GEMINI_API_KEY`, `GROQ_API_KEY`, `ANTHROPIC_API_KEY`).
 
 4. **Run Database Migrations**:
    Execute Alembic migration against the production database connection string:
@@ -35,7 +35,33 @@ This document provides step-by-step instructions for deploying the standalone Di
 
 ---
 
-## 3. Option B: Docker Compose Production Deployment
+## 3. Option B: Vercel Serverless Deployment
+
+1. **Vercel Project Setup**:
+   - Connect your GitHub repository to [Vercel](https://vercel.com).
+   - Vercel automatically detects `vercel.json` and configures the Python serverless function at `api/index.py`.
+
+2. **Environment Variables on Vercel**:
+   Add the following environment variables in your Vercel Project Settings -> Environment Variables:
+   - `ACTIVE_LLM_PROVIDER`: `google_gemini` (or `groq`, `openai`, `anthropic`)
+   - `GEMINI_API_KEY` / `GROQ_API_KEY` / `OPENAI_API_KEY`: Your AI provider key
+   - `DATABASE_URL`: Your PostgreSQL / Supabase connection string (e.g., `postgres://...`)
+   - `APP_ENV`: `production`
+   - `DEBUG`: `false`
+
+3. **Deploy via Vercel CLI**:
+   ```bash
+   vercel --prod
+   ```
+
+4. **Widget Assets & Demo Page**:
+   - Widget JS: `https://<your-vercel-app>.vercel.app/widget.js`
+   - Widget CSS: `https://<your-vercel-app>.vercel.app/widget.css`
+   - Live Interactive Demo: `https://<your-vercel-app>.vercel.app/demo`
+
+---
+
+## 4. Option C: Docker Compose Production Deployment
 
 1. **Configure Environment Variables**:
    Copy `.env.example` to `.env` and fill in secrets:

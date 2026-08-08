@@ -12,6 +12,11 @@ from sqlalchemy.ext.asyncio import (
 from apps.backend.app.core.config import settings
 
 db_url = settings.DATABASE_URL
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+elif db_url.startswith("postgresql://"):
+    db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
 try:
     import asyncpg
 except ImportError:

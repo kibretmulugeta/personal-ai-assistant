@@ -126,7 +126,7 @@ export default function App() {
 
 - [docs/ARCHITECTURE.md](file:///e:/Developer/Ml%20projects/Chat%20Platform/docs/ARCHITECTURE.md): System architecture and package design.
 - [docs/API_DOCUMENTATION.md](file:///e:/Developer/Ml%20projects/Chat%20Platform/docs/API_DOCUMENTATION.md): Complete REST, SSE, and WebSocket API reference.
-- [docs/DEPLOYMENT_GUIDE.md](file:///e:/Developer/Ml%20projects/Chat%20Platform/docs/DEPLOYMENT_GUIDE.md): Render, Supabase, Docker, and Nginx deployment guide.
+- [docs/DEPLOYMENT_GUIDE.md](file:///e:/Developer/Ml%20projects/Chat%20Platform/docs/DEPLOYMENT_GUIDE.md): Vercel, Render, Supabase, Docker, and Nginx deployment guide.
 - [docs/WIDGET_INTEGRATION_GUIDE.md](file:///e:/Developer/Ml%20projects/Chat%20Platform/docs/WIDGET_INTEGRATION_GUIDE.md): HTML and React widget integration manual.
 - [docs/SECURITY_NOTES.md](file:///e:/Developer/Ml%20projects/Chat%20Platform/docs/SECURITY_NOTES.md): Security controls and prompt injection defenses.
 - [docs/RAG_PIPELINE.md](file:///e:/Developer/Ml%20projects/Chat%20Platform/docs/RAG_PIPELINE.md): Ingestion, chunking, embeddings, and retrieval details.
