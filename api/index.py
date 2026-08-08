@@ -18,7 +18,7 @@ class VercelPathRewriteMiddleware:
 
     async def __call__(self, scope, receive, send):
         if scope["type"] in ("http", "websocket"):
-            headers = dict(scope.get("headers", []))
+            headers = {k.lower(): v for k, v in scope.get("headers", [])}
             forwarded_uri = headers.get(b"x-forwarded-uri")
             if forwarded_uri:
                 path = forwarded_uri.decode("utf-8").split("?")[0]

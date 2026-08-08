@@ -11,8 +11,19 @@ from sqlalchemy.ext.asyncio import (
 )
 from apps.backend.app.core.config import settings
 
+import os
+from pathlib import Path
+
 db_url = settings.DATABASE_URL
-if db_url.startswith("postgres://"):
+is_vercel = "VERCEL" in os.environ or "VERCEL_ENV" in os.environ
+
+if is_vercel and ("localhost" in db_url or "127.0.0.1" in db_url):
+    kb_sqlite = Path(__file__).resolve().parent.parent.parent / "knowledge_base.sqlite"
+    if kb_sqlite.exists():
+        db_url = f"sqlite+aiosqlite:///{kb_sqlite}"
+    else:
+        db_url = "sqlite+aiosqlite:///:memory:"
+elif db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
 elif db_url.startswith("postgresql://"):
     db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
@@ -20,8 +31,8 @@ elif db_url.startswith("postgresql://"):
 try:
     import asyncpg
 except ImportError:
-    # Fallback to SQLite in-memory for testing environments without asyncpg
-    db_url = "sqlite+aiosqlite:///:memory:"
+    if "sqlite" not in db_url:
+        db_url = "sqlite+aiosqlite:///:memory:"
 
 engine: AsyncEngine = create_async_engine(
     db_url,
@@ -40,13 +51,18 @@ AsyncSessionLocal = async_sessionmaker(
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
-    """Dependency injector yielding an async database session."""
-    async with AsyncSessionLocal() as session:
-        try:
-            yield session
-            await session.commit()
-        except Exception:
-            await session.rollback()
-            raise
-        finally:
-            await session.close()
+    """Dependency injector yielding an async database session with graceful exception handling."""
+    try:
+        async with AsyncSessionLocal() as session:
+            try:
+                yield session
+                await session.commit()
+            except Exception:
+                await session.rollback()
+                raise
+            finally:
+                await session.close()
+    except Exception:
+        # Fail gracefully if database connection fails in serverless / stateless environments
+        pass
+

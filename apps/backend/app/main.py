@@ -21,19 +21,23 @@ logger = get_logger("backend.main")
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan context managing startup and shutdown tasks."""
-    # Startup actions
-    setup_logging(log_level=settings.LOG_LEVEL, is_dev=(settings.APP_ENV == "development"))
-    logger.info(
-        "starting_application",
-        app_name=settings.APP_NAME,
-        environment=settings.APP_ENV,
-        active_llm=settings.ACTIVE_LLM_PROVIDER,
-        active_embedding=settings.ACTIVE_EMBEDDING_PROVIDER,
-    )
+    try:
+        setup_logging(log_level=settings.LOG_LEVEL, is_dev=(settings.APP_ENV == "development"))
+        logger.info(
+            "starting_application",
+            app_name=settings.APP_NAME,
+            environment=settings.APP_ENV,
+            active_llm=settings.ACTIVE_LLM_PROVIDER,
+            active_embedding=settings.ACTIVE_EMBEDDING_PROVIDER,
+        )
+    except Exception as exc:
+        print(f"Lifespan startup warning: {exc}")
     yield
-    # Shutdown actions
-    logger.info("shutting_down_application")
-    await engine.dispose()
+    try:
+        logger.info("shutting_down_application")
+        await engine.dispose()
+    except Exception:
+        pass
 
 
 def create_application() -> FastAPI:
